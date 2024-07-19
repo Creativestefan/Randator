@@ -161,7 +161,6 @@
 
                 <label for="includeExtension" id="includeExtensionLabel" style="display: none;">Include Extension</label>
                 <input type="checkbox" id="includeExtension" style="display: none;">
-
             </div>
 
             <button id="generate">Generate Data</button>
@@ -192,11 +191,13 @@
         });
 
         document.getElementById('continent').addEventListener('change', function() {
-            parent.postMessage({ pluginMessage: { type: 'load-countries', continent: this.value } }, '*');
+            const dataType = document.getElementById('dataType').value;
+            parent.postMessage({ pluginMessage: { type: 'load-countries', continent: this.value, dataType } }, '*');
         });
 
         document.getElementById('dataType').addEventListener('change', function() {
             const dataType = this.value;
+            parent.postMessage({ pluginMessage: { type: 'load-continents', dataType } }, '*');
             if (dataType === 'names') {
                 document.getElementById('nameTypeLabel').style.display = 'block';
                 document.getElementById('nameType').style.display = 'block';
