@@ -167,6 +167,66 @@ figma.ui.onmessage = async (msg) => {
       figma.notify(`Error: ${error.message}`);
     }
   }
+
+  if (msg.type === 'generate-emails') {
+    console.log('Generating emails');
+    const selection = figma.currentPage.selection;
+    const textNodes = selection.filter(node => node.type === 'TEXT');
+    console.log('Selected text nodes:', textNodes.length);
+
+    if (textNodes.length === 0) {
+      figma.notify('Please select at least one text layer.');
+      return;
+    }
+
+    try {
+      for (const node of textNodes) {
+        try {
+          await figma.loadFontAsync(node.fontName);
+          const randomEmail = msg.data[Math.floor(Math.random() * msg.data.length)];
+          console.log(`Setting email "${randomEmail}" for node:`, node.id);
+          node.characters = randomEmail;
+        } catch (error) {
+          console.error(`Error setting email for node ${node.id}:`, error);
+        }
+      }
+
+      figma.notify(`Generated emails for ${textNodes.length} text layer(s)`);
+    } catch (error) {
+      console.error('Error generating emails:', error);
+      figma.notify(`Error: ${error.message}`);
+    }
+  }
+
+  if (msg.type === 'generate-usernames') {
+    console.log('Generating usernames');
+    const selection = figma.currentPage.selection;
+    const textNodes = selection.filter(node => node.type === 'TEXT');
+    console.log('Selected text nodes:', textNodes.length);
+
+    if (textNodes.length === 0) {
+      figma.notify('Please select at least one text layer.');
+      return;
+    }
+
+    try {
+      for (const node of textNodes) {
+        try {
+          await figma.loadFontAsync(node.fontName);
+          const randomUsername = msg.data[Math.floor(Math.random() * msg.data.length)];
+          console.log(`Setting username "${randomUsername}" for node:`, node.id);
+          node.characters = randomUsername;
+        } catch (error) {
+          console.error(`Error setting username for node ${node.id}:`, error);
+        }
+      }
+
+      figma.notify(`Generated usernames for ${textNodes.length} text layer(s)`);
+    } catch (error) {
+      console.error('Error generating usernames:', error);
+      figma.notify(`Error: ${error.message}`);
+    }
+  }
 };
 
 console.log('Plugin code loaded and running');

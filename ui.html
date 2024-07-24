@@ -199,6 +199,23 @@
             <button id="phones-back-btn">Back</button>
         </div>
     </div>
+    <div id="emails-screen" class="container" style="display: none;">
+        <h1>Generate Random Emails</h1>
+        <div class="content-container">
+            <p>Make sure you have selected text layer(s) before generating.</p>
+            <button id="generate-emails-btn">Generate Emails</button>
+            <button id="emails-back-btn">Back</button>
+        </div>
+    </div>
+
+    <div id="usernames-screen" class="container" style="display: none;">
+        <h1>Generate Random Usernames</h1>
+        <div class="content-container">
+            <p>Make sure you have selected text layer(s) before generating.</p>
+            <button id="generate-usernames-btn">Generate Usernames</button>
+            <button id="usernames-back-btn">Back</button>
+        </div>
+    </div>
 
     <div class="footer">
         <div class="footer-links">
@@ -218,26 +235,30 @@
             const welcomeScreen = document.getElementById('welcome-screen');
             const namesScreen = document.getElementById('names-screen');
             const phonesScreen = document.getElementById('phones-screen');
-
+        
             const randomNamesBtn = document.getElementById('random-names-btn');
             const randomPhonesBtn = document.getElementById('random-phones-btn');
+            const randomEmailsBtn = document.getElementById('random-emails-btn');
+            const randomUsernamesBtn = document.getElementById('random-usernames-btn');
             const namesBackBtn = document.getElementById('names-back-btn');
             const phonesBackBtn = document.getElementById('phones-back-btn');
-
+        
             const namesContinentSelect = document.getElementById('names-continent');
             const namesCountrySelect = document.getElementById('names-country');
             const phonesContinentSelect = document.getElementById('phones-continent');
             const phonesCountrySelect = document.getElementById('phones-country');
-
+        
             let namesData = { continents: [], countries: [] };
             let phonesData = { continents: [], countries: [] };
-
+            let emailsData = [];
+            let usernamesData = [];
+        
             function showScreen(screenToShow) {
                 [welcomeScreen, namesScreen, phonesScreen].forEach(screen => {
                     screen.style.display = screen === screenToShow ? 'flex' : 'none';
                 });
             }
-
+        
             async function fetchNamesData() {
                 try {
                     const response = await fetch('https://api.jsonsilo.com/public/b5eacb57-3598-47af-972f-f82c774bcbf3');
@@ -248,7 +269,7 @@
                     return { continents: [], countries: [] };
                 }
             }
-
+        
             async function fetchPhonesData() {
                 try {
                     const response = await fetch('https://api.jsonsilo.com/public/9336dbc3-d397-404b-8b2c-e0b55bcae392');
@@ -259,7 +280,20 @@
                     return { continents: [], countries: [] };
                 }
             }
-
+        
+            async function fetchEmailsUsernamesData() {
+                try {
+                    const response = await fetch('https://api.jsonsilo.com/public/8644f67c-3f58-4bb4-929b-072849ac42fb');
+                    const data = await response.json();
+                    emailsData = data.emails;
+                    usernamesData = data.usernames;
+                } catch (error) {
+                    console.error('Error fetching emails and usernames data:', error);
+                    emailsData = [];
+                    usernamesData = [];
+                }
+            }
+        
             function extractContinentsAndCountries(data) {
                 const result = { continents: [], countries: [] };
                 data.data.forEach(item => {
@@ -270,7 +304,7 @@
                 });
                 return result;
             }
-
+        
             function extractPhonesData(data) {
                 const result = { continents: [], countries: [] };
                 data.data.forEach(continent => {
@@ -281,17 +315,17 @@
                 });
                 return result;
             }
-
+        
             async function populateNamesDropdowns() {
                 namesData = await fetchNamesData();
                 populateDropdowns(namesContinentSelect, namesCountrySelect, namesData);
             }
-
+        
             async function populatePhonesDropdowns() {
                 phonesData = await fetchPhonesData();
                 populateDropdowns(phonesContinentSelect, phonesCountrySelect, phonesData);
             }
-
+        
             function populateDropdowns(continentSelect, countrySelect, data) {
                 continentSelect.innerHTML = '<option value="random">Random Continent</option>';
                 data.continents.forEach(continent => {
@@ -300,10 +334,10 @@
                     option.textContent = continent;
                     continentSelect.appendChild(option);
                 });
-
+        
                 populateCountries(countrySelect, 'random', data);
             }
-
+        
             function populateCountries(select, continent, data) {
                 select.innerHTML = '<option value="random">Random Country</option>';
                 const countries = continent === 'random' 
@@ -317,30 +351,40 @@
                     select.appendChild(option);
                 });
             }
-
+        
             function updateCountries(continentSelect, countrySelect, data) {
                 continentSelect.addEventListener('change', () => {
                     const selectedContinent = continentSelect.value;
                     populateCountries(countrySelect, selectedContinent, data);
                 });
             }
-
+        
             randomNamesBtn.addEventListener('click', () => {
                 showScreen(namesScreen);
                 populateNamesDropdowns();
             });
-
+        
             randomPhonesBtn.addEventListener('click', () => {
                 showScreen(phonesScreen);
                 populatePhonesDropdowns();
             });
-
+        
+            randomEmailsBtn.addEventListener('click', async () => {
+                await fetchEmailsUsernamesData();
+                parent.postMessage({ pluginMessage: { type: 'generate-emails', data: emailsData } }, '*');
+            });
+        
+            randomUsernamesBtn.addEventListener('click', async () => {
+                await fetchEmailsUsernamesData();
+                parent.postMessage({ pluginMessage: { type: 'generate-usernames', data: usernamesData } }, '*');
+            });
+        
             namesBackBtn.addEventListener('click', () => showScreen(welcomeScreen));
             phonesBackBtn.addEventListener('click', () => showScreen(welcomeScreen));
-
+        
             updateCountries(namesContinentSelect, namesCountrySelect, namesData);
             updateCountries(phonesContinentSelect, phonesCountrySelect, phonesData);
-
+        
             document.getElementById('generate-names-btn').addEventListener('click', () => {
                 const options = {
                     continent: namesContinentSelect.value,
@@ -349,7 +393,7 @@
                 };
                 parent.postMessage({ pluginMessage: { type: 'generate-names', options } }, '*');
             });
-
+        
             document.getElementById('generate-phones-btn').addEventListener('click', () => {
                 const options = {
                     continent: phonesContinentSelect.value,
@@ -359,6 +403,6 @@
                 parent.postMessage({ pluginMessage: { type: 'generate-phones', options } }, '*');
             });
         });
-    </script>
+        </script>
 </body>
 </html>
