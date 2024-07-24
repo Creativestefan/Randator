@@ -82,15 +82,9 @@ figma.ui.onmessage = async (msg) => {
 
         if (msg.continent === "" || msg.country === "") {
           // Random selection
-          const randomContinent = data.data[Math.floor(Math.random() * data.data.length)];
-          countryData = randomContinent;
+          countryData = data.data[Math.floor(Math.random() * data.data.length)];
         } else {
-          const continentData = data.data.find(item => item.continent === msg.continent);
-          console.log('Extracted continentData:', continentData);
-          if (continentData) {
-            countryData = continentData.countries.find(country => country.country === msg.country);
-            console.log('Extracted countryData:', countryData);
-          }
+          countryData = data.data.find(item => item.continent === msg.continent && item.country === msg.country);
         }
 
         if (!countryData) {
