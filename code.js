@@ -227,6 +227,51 @@ figma.ui.onmessage = async (msg) => {
       figma.notify(`Error: ${error.message}`);
     }
   }
+
+  if (msg.type === 'generate-numbers') {
+    console.log('Generating random numbers:', msg.options);
+    const selection = figma.currentPage.selection;
+    const textNodes = selection.filter(node => node.type === 'TEXT');
+    console.log('Selected text nodes:', textNodes.length);
+
+    if (textNodes.length === 0) {
+      figma.notify('Please select at least one text layer.');
+      return;
+    }
+
+    try {
+      const digits = msg.options.digits;
+      const replaceNumericOnly = msg.options.replaceNumericOnly;
+
+      for (const node of textNodes) {
+        try {
+          await figma.loadFontAsync(node.fontName);
+          const min = Math.pow(10, digits - 1);
+          const max = Math.pow(10, digits) - 1;
+          const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+          console.log(`Generated random number: ${randomNumber}`);
+
+          if (replaceNumericOnly) {
+            const newText = node.characters.replace(/\d+/g, match => {
+              return randomNumber.toString().padStart(match.length, '0');
+            });
+            node.characters = newText;
+          } else {
+            node.characters = randomNumber.toString();
+          }
+
+          console.log(`Set text for node ${node.id}: ${node.characters}`);
+        } catch (error) {
+          console.error(`Error setting number for node ${node.id}:`, error);
+        }
+      }
+
+      figma.notify(`Generated random numbers for ${textNodes.length} text layer(s)`);
+    } catch (error) {
+      console.error('Error generating random numbers:', error);
+      figma.notify(`Error: ${error.message}`);
+    }
+  }
 };
 
 console.log('Plugin code loaded and running');
