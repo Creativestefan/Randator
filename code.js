@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 350, height: 500 });
+figma.showUI(__html__, { width: 350, height: 450 });
 
 async function fetchData(url) {
   console.log(`Fetching data from ${url}`);
