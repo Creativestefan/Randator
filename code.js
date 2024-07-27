@@ -1,30 +1,26 @@
+const isProduction = true; // Set this to `false` during development
+
 figma.showUI(__html__, { width: 350, height: 450 });
 
 async function fetchData(url) {
-  console.log(`Fetching data from ${url}`);
+  if (!isProduction) {
+    console.log(`Fetching data from ${url}`);
+  }
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const data = await response.json();
-  console.log('Fetched data:', data);
+  if (!isProduction) {
+    console.log('Fetched data:', data);
+  }
   return data;
 }
 
-async function fetchContinentsAndCountries() {
-  try {
-    const data = await fetchData('https://api.jsonsilo.com/public/b5eacb57-3598-47af-972f-f82c774bcbf3');
-    const continentsAndCountries = extractContinentsAndCountries(data);
-    return continentsAndCountries;
-  } catch (error) {
-    console.error('Error fetching continents and countries:', error);
-    figma.notify(`Error: ${error.message}`);
-    return {};
-  }
-}
-
 function extractContinentsAndCountries(data) {
-  console.log('Extracting continents and countries from:', data);
+  if (!isProduction) {
+    console.log('Extracting continents and countries from data...');
+  }
   const result = {
     continents: [],
     countries: []
@@ -40,12 +36,28 @@ function extractContinentsAndCountries(data) {
     });
   });
 
-  console.log('Extracted data:', result);
+  if (!isProduction) {
+    console.log('Extracted continents and countries:', result.continents, result.countries.length);
+  }
   return result;
 }
 
+async function fetchContinentsAndCountries() {
+  try {
+    const data = await fetchData('https://api.jsonsilo.com/public/b5eacb57-3598-47af-972f-f82c774bcbf3');
+    const continentsAndCountries = extractContinentsAndCountries(data);
+    return continentsAndCountries;
+  } catch (error) {
+    console.error('Error fetching continents and countries:', error);
+    figma.notify(`Error: ${error.message}`);
+    return {};
+  }
+}
+
 figma.ui.onmessage = async (msg) => {
-  console.log('Received message:', msg);
+  if (!isProduction) {
+    console.log('Received message:', msg);
+  }
 
   if (msg.type === 'load-data') {
     try {
@@ -63,10 +75,15 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'generate-names') {
-    console.log('Generating names:', msg.options);
+    if (!isProduction) {
+      console.log('Generating names:', msg.options);
+    }
     const selection = figma.currentPage.selection;
     const textNodes = selection.filter(node => node.type === 'TEXT');
-    console.log('Selected text nodes:', textNodes.length);
+
+    if (!isProduction) {
+      console.log('Selected text nodes:', textNodes.length);
+    }
 
     if (textNodes.length === 0) {
       figma.notify('Please select at least one text layer.');
@@ -75,7 +92,6 @@ figma.ui.onmessage = async (msg) => {
 
     try {
       const data = await fetchData('https://api.jsonsilo.com/public/b5eacb57-3598-47af-972f-f82c774bcbf3');
-      console.log('Complete data for names:', data);
 
       let filteredData = data.data;
       if (msg.options.continent !== 'random') {
@@ -108,7 +124,9 @@ figma.ui.onmessage = async (msg) => {
               name = `${firstName} ${lastName}`;
               break;
           }
-          console.log(`Setting name "${name}" for node:`, node.id);
+          if (!isProduction) {
+            console.log(`Setting name "${name}" for node:`, node.id);
+          }
           node.characters = name;
         } catch (error) {
           console.error(`Error setting name for node ${node.id}:`, error);
@@ -123,10 +141,15 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'generate-phones') {
-    console.log('Generating phone numbers:', msg.options);
+    if (!isProduction) {
+      console.log('Generating phone numbers:', msg.options);
+    }
     const selection = figma.currentPage.selection;
     const textNodes = selection.filter(node => node.type === 'TEXT');
-    console.log('Selected text nodes:', textNodes.length);
+
+    if (!isProduction) {
+      console.log('Selected text nodes:', textNodes.length);
+    }
 
     if (textNodes.length === 0) {
       figma.notify('Please select at least one text layer.');
@@ -135,7 +158,6 @@ figma.ui.onmessage = async (msg) => {
 
     try {
       const data = await fetchData('https://api.jsonsilo.com/public/9336dbc3-d397-404b-8b2c-e0b55bcae392');
-      console.log('Complete data for phone numbers:', data);
 
       let filteredData = data.data.flatMap(continent => continent.countries);
       if (msg.options.continent !== 'random') {
@@ -159,7 +181,9 @@ figma.ui.onmessage = async (msg) => {
           if (msg.options.includeExtension) {
             phoneNumber = `+${randomItem.extension} ${phoneNumber}`;
           }
-          console.log(`Setting phone number "${phoneNumber}" for node:`, node.id);
+          if (!isProduction) {
+            console.log(`Setting phone number "${phoneNumber}" for node:`, node.id);
+          }
           node.characters = phoneNumber;
         } catch (error) {
           console.error(`Error setting phone number for node ${node.id}:`, error);
@@ -174,10 +198,15 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'generate-emails') {
-    console.log('Generating emails');
+    if (!isProduction) {
+      console.log('Generating emails');
+    }
     const selection = figma.currentPage.selection;
     const textNodes = selection.filter(node => node.type === 'TEXT');
-    console.log('Selected text nodes:', textNodes.length);
+
+    if (!isProduction) {
+      console.log('Selected text nodes:', textNodes.length);
+    }
 
     if (textNodes.length === 0) {
       figma.notify('Please select at least one text layer.');
@@ -189,7 +218,9 @@ figma.ui.onmessage = async (msg) => {
         try {
           await figma.loadFontAsync(node.fontName);
           const randomEmail = msg.data[Math.floor(Math.random() * msg.data.length)];
-          console.log(`Setting email "${randomEmail}" for node:`, node.id);
+          if (!isProduction) {
+            console.log(`Setting email "${randomEmail}" for node:`, node.id);
+          }
           node.characters = randomEmail;
         } catch (error) {
           console.error(`Error setting email for node ${node.id}:`, error);
@@ -204,10 +235,15 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'generate-usernames') {
-    console.log('Generating usernames');
+    if (!isProduction) {
+      console.log('Generating usernames');
+    }
     const selection = figma.currentPage.selection;
     const textNodes = selection.filter(node => node.type === 'TEXT');
-    console.log('Selected text nodes:', textNodes.length);
+
+    if (!isProduction) {
+      console.log('Selected text nodes:', textNodes.length);
+    }
 
     if (textNodes.length === 0) {
       figma.notify('Please select at least one text layer.');
@@ -219,7 +255,9 @@ figma.ui.onmessage = async (msg) => {
         try {
           await figma.loadFontAsync(node.fontName);
           const randomUsername = msg.data[Math.floor(Math.random() * msg.data.length)];
-          console.log(`Setting username "${randomUsername}" for node:`, node.id);
+          if (!isProduction) {
+            console.log(`Setting username "${randomUsername}" for node:`, node.id);
+          }
           node.characters = randomUsername;
         } catch (error) {
           console.error(`Error setting username for node ${node.id}:`, error);
@@ -234,10 +272,15 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'generate-numbers') {
-    console.log('Generating random numbers:', msg.options);
+    if (!isProduction) {
+      console.log('Generating random numbers:', msg.options);
+    }
     const selection = figma.currentPage.selection;
     const textNodes = selection.filter(node => node.type === 'TEXT');
-    console.log('Selected text nodes:', textNodes.length);
+
+    if (!isProduction) {
+      console.log('Selected text nodes:', textNodes.length);
+    }
 
     if (textNodes.length === 0) {
       figma.notify('Please select at least one text layer.');
@@ -254,7 +297,10 @@ figma.ui.onmessage = async (msg) => {
           const min = Math.pow(10, digits - 1);
           const max = Math.pow(10, digits) - 1;
           const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-          console.log(`Generated random number: ${randomNumber}`);
+
+          if (!isProduction) {
+            console.log(`Generated random number: ${randomNumber}`);
+          }
 
           if (replaceNumericOnly) {
             const newText = node.characters.replace(/\d+/g, match => {
@@ -265,7 +311,9 @@ figma.ui.onmessage = async (msg) => {
             node.characters = randomNumber.toString();
           }
 
-          console.log(`Set text for node ${node.id}: ${node.characters}`);
+          if (!isProduction) {
+            console.log(`Set text for node ${node.id}: ${node.characters}`);
+          }
         } catch (error) {
           console.error(`Error setting number for node ${node.id}:`, error);
         }
@@ -279,4 +327,6 @@ figma.ui.onmessage = async (msg) => {
   }
 };
 
-console.log('Plugin code loaded and running');
+if (!isProduction) {
+  console.log('Plugin code loaded and running');
+}
