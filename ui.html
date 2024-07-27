@@ -146,7 +146,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 12px;
+            padding: 4px 6px;
             background-color: white;
             color: #1c1c1e;
             border-radius: 4px;
@@ -281,7 +281,9 @@
             <!-- <a href="#" style="color: #D4D4D8; text-decoration: none;">Terms & Privacy</a> -->
         </div>
         <div class="footer-button">
-            <span>FREE version!</span>
+            <a href="https://buymeacoffee.com/creativestefan" target="_blank" class="footer-button" id="buy-coffee-btn">
+                <span>☕️ Buy me a coffee</span>
+            </a>
         </div>
     </div>
 
@@ -306,6 +308,12 @@
             const namesCountrySelect = document.getElementById('names-country');
             const phonesContinentSelect = document.getElementById('phones-continent');
             const phonesCountrySelect = document.getElementById('phones-country');
+
+            const buyCoffeeBtn = document.getElementById('buy-coffee-btn');
+    
+    buyCoffeeBtn.addEventListener('click', () => {
+        parent.postMessage({ pluginMessage: { type: 'openExternalUrl', url: 'https://buymeacoffee.com/creativestefan' } }, '*');
+    });
         
             let namesData = { continents: [], countries: [] };
             let phonesData = { continents: [], countries: [] };

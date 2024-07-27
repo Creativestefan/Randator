@@ -56,6 +56,11 @@ figma.ui.onmessage = async (msg) => {
       figma.notify(`Error: ${error.message}`);
     }
   }
+  
+  if (msg.type === 'openExternalUrl') {
+    figma.notify('Opening external link...');
+    figma.openExternal(msg.url);
+  }
 
   if (msg.type === 'generate-names') {
     console.log('Generating names:', msg.options);
